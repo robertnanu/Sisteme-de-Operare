@@ -36,6 +36,7 @@ void barrier_point()
     // Creste valoarea lui S cu o unitate
     // Dupa incrementare verifica daca sunt thread-uri blocate de semafor
     // Si elibereaza thread-ul care asteapta de cel mai mult timp in coada
+    // Si reia executia din punctul in care s-a apelat sem_wait
     if(sem_post(&sem)) {
         perror(NULL);
         exit(errno);
@@ -76,8 +77,11 @@ void init(int N)
 pthread_t create_process(int res)
 {
     pthread_t ret;
+    // Aloc spatiu pentru un element de tip int
     int *x = (int *)malloc(sizeof(int));
     *x = res;
+    // Creez firul de executie care porneste de la functia tfun
+    // Ce primeste x ca parametru
     if(pthread_create(&ret, NULL, tfun, x)) {
         perror(NULL);
         exit(errno);

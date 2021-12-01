@@ -70,8 +70,11 @@ void *proc(void *v)
 pthread_t create_process(int res)
 {
     pthread_t ret;
+    // Alocam spatiu pentru un element de tip int
     int *x = (int *)malloc(sizeof(int));
     *x = res;
+    // Cream firul de executie pornind de la functia prod
+    // Care primeste argumentul x
     if(pthread_create(&ret, NULL, proc, x)) {
         perror(NULL);
         exit(errno);

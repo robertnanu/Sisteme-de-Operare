@@ -9,6 +9,7 @@ void *strrev(void *v)
 {
     char *str = (char*)v;
     int L = strlen(str);
+    // Alocam spatiu pentru L + 1 caractere de tip char
     char *ret = malloc(L + 1);
     // Realizam rasturnatul
     for(int i = 0; i < L; i++) {
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
     // Initializam thr cu noul fir de executie
     // Diferenta intre fork si thread este aceea ca
     // Thread-ul porneste de la o functie data
-    // In cazul nostru, strrev
+    // In cazul nostru, strrev, care primeste argumentul argv[1]
     if(pthread_create(&thr, NULL, strrev, argv[1])) {
         perror(NULL);
         return errno;

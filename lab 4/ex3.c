@@ -25,7 +25,9 @@ void collatz(int n)
 
 int main(int argc, char *argv[])
 {
+    // Transformam din string in int
     n = atoi(argv[1]);
+    // Initializam noul proces
     pid_t pid;
     printf("Starting parent %d\n", getppid());
     for(i = 1; i < argc; i++)
@@ -42,7 +44,7 @@ int main(int argc, char *argv[])
     }
 
     for(i = 1; i < argc; i++)
-    wait(NULL);
+        wait(NULL);
 
     printf("Done Parent %d Me %d\n", getppid(), getpid());
     return 0;

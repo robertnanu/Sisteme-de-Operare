@@ -1,1 +1,6 @@
-salut
+int idx = 0;
+do
+{
+    bytesWritten = write(fdOUT, buf, bytesRead);
+    idx += bytesWritten;
+}while(bytesWritten > 0 && idx < bytesRead);

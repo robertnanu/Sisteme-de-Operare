@@ -16,6 +16,8 @@ int shm_fd;
 
 int itoa2(int n, char *ptr)
 {
+    // Transforma din int in str
+    // ret reprezinta numarul de cifre ale int-ului initial
     char c[13];
     int ret = 0;
     while(n != 0) {
@@ -23,7 +25,9 @@ int itoa2(int n, char *ptr)
         n /= 10;
     }
     for(int i = ret - 1; i >= 0; i--) {
+        // Incarc in zona de memorie de la adresa ptr fiecare caracter
         *ptr = c[i];
+        // Trec la urmatorul byte
         ptr++;
     }
     return ret;
@@ -31,12 +35,18 @@ int itoa2(int n, char *ptr)
 
 void collatz(int n, char *ptr)
 {
+    // Shiftez la dreapta cu ret pozitii
     ptr += itoa2(n, ptr);
+    // Incarc in zona de memorie caracterul ':'
     *ptr = ':';
+    // Trec la urmatorul byte
     ptr++;
     while(n != 1) {
+        // Incarc in zona de memorie pe n
         ptr += itoa2(n, ptr);
+        // Incarc spatiul
         *ptr = ' ';
+        // Trec la urmatorul byte
         ptr++;
         if(n % 2 == 0) {
             n /= 2;
@@ -45,8 +55,11 @@ void collatz(int n, char *ptr)
             n = 3 * n + 1;
         }
     }
+    // Incarc ultima valoare a lui n, probabil 1
     ptr += itoa2(n, ptr);
+    // Incarc new line-ul
     *ptr = '\n';
+    // Trec la urmatorul byte
     ptr++;
 }
 
@@ -104,10 +117,13 @@ int main(int argc, char *argv[])
     }
 
     for(int i = 1; i < argc; i++) {
+        // Afisez fiecare pagina
         printf("%s", shm_ptr + (i - 1) * getpagesize());
     }
 
     printf("Done Parent %d Me %d\n", getppid(), getpid());
+    // Cand nu mai este nevoie de zona de memorie partajata
+    // Aceasta se elibereaza
     munmap(shm_ptr, shm_size);
     // Eliberam zona de memorie partajata, atunci cand nu mai este necesara
     shm_unlink(shm);

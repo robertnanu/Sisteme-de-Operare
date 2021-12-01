@@ -37,13 +37,9 @@ int main(int argc, char *argv[])
 
     int bytesRead = 0, bytesWritten = 0;
 
+    // Citesc pe rand cate bufSize caractere si le scriu cu write in fdOUT
     for(bytesRead = read(fdIN, buf, bufSize); bytesRead > 0; bytesRead = read(fdIN, buf, bufSize)) {
-        int idx = 0;
-        do
-        {
-            bytesWritten = write(fdOUT, buf, bytesRead);
-            idx += bytesWritten;
-        }while(bytesWritten > 0 && idx < bytesRead);
+        bytesWritten = write(fdOUT, buf, bytesRead);
         if(bytesWritten < 0) {
             perror("write buf");
             return errno;
@@ -55,6 +51,7 @@ int main(int argc, char *argv[])
         return errno;
     }
 
+    // Inchidem fisiere
     close(fdIN);
     close(fdOUT);
 	return 0;

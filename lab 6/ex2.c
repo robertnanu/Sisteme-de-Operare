@@ -30,7 +30,9 @@ int main()
 {
     for(int i = 0; i < 4; i++) {
         for(int j = 0; j < 4; j++) {
+            // Aloc un vector cu doua elemente
             int *x = (int*)malloc(sizeof(int) * 2);
+            // In x memorez noile pozitii din matricea rezultata
             x[0] = i;
             x[1] = j;
             // Initializam noul fir de executie plecand de la functia compute_product
