@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
     // Cand nu mai este nevoie de zona de memorie partajata
     // Aceasta se elibereaza
     munmap(shm_ptr, shm_size);
-    // Eliberam zona de memorie partajata, atunci cand nu mai este necesara
+    // Sterge obiectul creat anterior de shm_open
     shm_unlink(shm);
     return 0;
 }
