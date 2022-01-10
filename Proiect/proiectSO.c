@@ -11,16 +11,17 @@
 #include <string.h>
 #include <time.h>
 
-void make_perm(int v[], int n) 
-{ 
-	srand(time(NULL)); 
-	for(int i = n-1; i; --i) 
-	{ 
-		int j = rand() % (i+1); 
+void encript(int v[], int n)
+{
+    // Foloseste ceasul intern ak computerului pentru a controla alegerea seed-urilor
+	srand(time(NULL));
+	for(int i = n-1; i; --i)
+	{
+		int j = rand() % (i+1);
 		int aux = v[i];
         v[i] = v[j];
-        v[j] = aux; 
-	} 
+        v[j] = aux;
+	}
 }
 
 int main(int argc, char *argv[])
@@ -28,11 +29,11 @@ int main(int argc, char *argv[])
     // Obtinem dimensiunea paginii
     int page_size = getpagesize();
 
-    // Daca avem exact doua argumente in apel
+    // Daca avem exact doua argumente in apel, deci vrem sa criptam un anumit fisier
     if(argc == 2)
     {
         char permsFile[] = "permutari";
-        char writeFile[strlen(argv[1])];   
+        char writeFile[strlen(argv[1])];
         strcpy(writeFile, argv[1]);
         strcpy(writeFile + strlen(argv[1]) - 4, "Encripted.txt");
 
@@ -60,10 +61,11 @@ int main(int argc, char *argv[])
             return 0;
         }
 
+        // Calculez numarul de cuvinte aflate in fisierul de intrare
         int nrcuv = 1;
         char c;
         while((c = fgetc(fin)) != EOF)
-            if(c == ' ') 
+            if(c == ' ')
                 nrcuv++;
         fseek(fin, 0, SEEK_SET);
 
@@ -107,19 +109,27 @@ int main(int argc, char *argv[])
             if(pid < 0) return errno;
             else if(pid == 0)
             {
+                // Instructiuni copil
+                // Prieiau lungimea cuvantului
                 int len_cuv = strlen(shm_ptr);
 				int perm[len_cuv];
-				for(int j = 0; j < len_cuv; ++j) perm[j] = j;
-				make_perm(perm, len_cuv);
-                
+                // Pe toata lungimea acestuia realizez o permutare random prin functia encript
+				for(int j = 0; j < len_cuv; ++j)
+                    perm[j] = j;
+				encript(perm, len_cuv);
+
+                // Reconstruiesc cuvantul in functie de criptarea rezultata
 				char ecripted[len_cuv+1];
-				for(int j = 0; j < len_cuv; ++j) ecripted[j] = shm_ptr[perm[j]];
-				
+				for(int j = 0; j < len_cuv; ++j)
+                    ecripted[j] = shm_ptr[perm[j]];
+
+                // Incarc toate informatiile (cuvantul criptat + permutarile folosite in criptare) in fisierele de iesire
 				for(int j = 0; j < len_cuv; ++j)
 				{
 					fprintf(foutPerms, "%d ", perm[j]);
 					fprintf(fout, "%c", ecripted[j]);
 				}
+                // La finalul cuvantului, in fisierul permutarile realizez un endline si in cel al mesajului criptat pun un ' '
                 if(i != nrcuv-1)
                 {
                     fprintf(foutPerms, "\n");
@@ -131,13 +141,13 @@ int main(int argc, char *argv[])
             munmap(shm_ptr, page_size);
         }
 
-        printf("Fisierul a fost criptat cu succes!\n");
+        printf("Fisierul trimis a fost criptat cu succes!\n");
         shm_unlink(shm_name);
         fclose(fin);
-        fclose(fout);
         fclose(foutPerms);
+        fclose(fout);
     }
-    else if(argc == 3)
+    else if(argc == 3) // Vrem sa decriptam un anumit fisier cunoscand permutarile criptarii initiale
     {
         char writeFile[strlen(argv[1])];
         strcpy(writeFile, argv[1]);
@@ -164,6 +174,7 @@ int main(int argc, char *argv[])
             return 0;
         }
 
+        // Aflu numarul de cuvinte si lungimea maxima a unui cuvant
         int nrcuv = 1, len = 0, maxLen = 0;
         char c;
         while((c = fgetc(fin)) != EOF)
@@ -178,6 +189,7 @@ int main(int argc, char *argv[])
             len++;
         }
         fseek(fin, 0, SEEK_SET);
+        // Matrice a permutarilor
         int perms[nrcuv+1][maxLen+1];
 
         char shm_name[] = "shmem";
@@ -206,10 +218,12 @@ int main(int argc, char *argv[])
                 return errno;
             }
 
+            // Iau caracter cu caracter primul cuvant si-i aflu si lungimea
             int len_cuv = 0;
             while((c = fgetc(fin)) != EOF)
             {
-				if(c == ' ') break;
+				if(c == ' ')
+                    break;
 				else
                 {
                     shm_ptr += sprintf(shm_ptr, "%c", c);
@@ -217,7 +231,9 @@ int main(int argc, char *argv[])
                 }
             }
 
-            for(int j = 0; j < len_cuv; ++j)  fscanf(finPerms, "%d", &perms[i][j]);
+            // Citesc permutarile din fisierul finPerms si le stochez in perms pe pozitia [i][j] a matricei
+            for(int j = 0; j < len_cuv; ++j)
+                fscanf(finPerms, "%d", &perms[i][j]);
         }
 
         for(int i = 0; i < nrcuv; ++i)
@@ -229,23 +245,33 @@ int main(int argc, char *argv[])
 			{
 				int len_cuv = strlen(shm_ptr);
 
+                // Simpla decriptare
 				char decripted[len_cuv+1];
-				for(int j = 0; j < len_cuv; ++j) decripted[perms[i][j]] = shm_ptr[j];
-				
-				for(int j = 0; j < len_cuv; ++j) fprintf(fout, "%c", decripted[j]);
-				if(i != nrcuv-1) fprintf(fout, " ");
+				for(int j = 0; j < len_cuv; ++j)
+                    decripted[perms[i][j]] = shm_ptr[j];
+
+                // Incarc decriptarea in fisierul de iesire
+				for(int j = 0; j < len_cuv; ++j)
+                    fprintf(fout, "%c", decripted[j]);
+                // La finalul cuvantului adaug un spatiu in fisierul de iesire
+				if(i != nrcuv-1)
+                    fprintf(fout, " ");
                 exit(0);
 			}
             else wait(NULL);
 			munmap(shm_ptr, page_size);
 		}
 
-        printf("Fisierul a fost decriptat cu succes!\n");
+        printf("Fisierul trimis a fost decriptat cu succes, folosind permutarile date!\n");
         shm_unlink(shm_name);
         fclose(fin);
         fclose(finPerms);
         fclose(fout);
     }
-    else printf("Criptare: ./encriptor [nume_fisier]\nDecriptare: ./encriptor [nume_fisier] [nume_fisier_permutari]\n");
+    else
+    {
+        printf("Pentru functia de criptare va rog folositi urmatorul apel: ./criptare [nume_fisier]\n");
+        printf("Pentru functia de decriptare va rog folositi urmatorul apel: ./decriptare [nume_fisier] [nume_fisier_permutari]\n");
+    }
     return 0;
 }
