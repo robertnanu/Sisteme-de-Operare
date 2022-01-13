@@ -13,7 +13,7 @@
 
 void encript(int v[], int n)
 {
-    // Foloseste ceasul intern ak computerului pentru a controla alegerea seed-urilor
+    // Foloseste ceasul intern al computerului pentru a controla alegerea seed-urilor
 	srand(time(NULL));
 	for(int i = n-1; i; --i)
 	{
